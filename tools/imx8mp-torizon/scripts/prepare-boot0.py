@@ -14,7 +14,7 @@ import uuid
 import zlib
 
 
-def prepare(tezi, output, extra_args="", bootloader_entropy=True, serial_number=None):
+def prepare(tezi, output, extra_args="", serial_number=None):
     if output.exists():
         raise ValueError("Refusing to overwrite boot0")
     if any(c in extra_args for c in "\x00\r\n;'\""):
@@ -65,10 +65,8 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, default=Path("artifacts/firmware/boot0.img"))
     parser.add_argument("--extra-args", default="")
     parser.add_argument("--serial-number", help="Stable virtual serial; default: a new renode-<random> identity")
-    parser.add_argument("--bootloader-entropy", action="store_true",
-                        help="Compatibility option; native entropy is supplied by the automatic Renode handoff")
     args = parser.parse_args()
     try:
-        prepare(args.tezi_directory, args.output, args.extra_args, args.bootloader_entropy, args.serial_number)
+        prepare(args.tezi_directory, args.output, args.extra_args, args.serial_number)
     except (ValueError, OSError) as error:
         parser.exit(1, f"prepare-boot0: {error}\n")

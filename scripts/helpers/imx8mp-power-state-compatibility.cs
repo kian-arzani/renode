@@ -12,8 +12,7 @@ namespace Antmicro.Renode.Extensions
             cpu.SetSMCRejection(enabled ? 0xc2000004u : 0u, 2);
         }
 
-        // Requires the accompanying tlib patch. Numeric value bridges the
-        // packaged Infrastructure.dll until the enum addition is upstream.
+        // Requires the accompanying tlib and infrastructure compatibility patches.
         public static void RejectUnmodeledPowerDown(this ARMv8A cpu, bool enabled = true, bool waitForInterrupt = false)
         {
             cpu.PSCIEmulationMethod = (BaseARMv8.PSCIConduitEmulationMethod)(enabled ? (waitForInterrupt ? 4 : 3) : 0);

@@ -63,7 +63,12 @@ Validation in the development workspace:
   endurance. Full acceptance took about 10m27s.
 * Current-upstream CPU backend, Infrastructure.dll and matching Renode.dll
   compiled successfully and passed the same 20 portable focused checks.
-  These managed components were built against pinned runtime dependencies;
-  this is not a clean build of every upstream dependency from source.
+  Full original-firmware acceptance also passed in about 11m46s, checking
+  all four CPUs, the normal OSTree root and 65 guest seconds of watchdog
+  endurance. These managed components were built against pinned runtime
+  dependencies; this is not a clean build of every dependency from source.
 
 See ``PR_NOTES.rst`` for the dependency branches and publication order.
+
+Legacy console boot-command generation and manual seed helpers are absent.
+The image tool only inspects native boot paths and prepares the boot0 environment.

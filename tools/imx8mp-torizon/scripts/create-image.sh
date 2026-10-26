@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Root is required to preserve guest owners, modes, device nodes and xattrs.
-# Usage: sudo ./create-image.sh [-o disk.img] torizon-Tezi.tar
+# Internal package builder; use ../prepare.sh on the host.
 OUTPUT=artifacts/torizon-emmc.img
 while getopts "o:" opt; do
     case "$opt" in
@@ -26,7 +26,7 @@ trap 'rm -rf -- "$STAGING"' EXIT
 mkdir "$STAGING/tezi" "$STAGING/rootfs"
 tar -xf "$1" -C "$STAGING/tezi"
 TEZI_DIR=$(python3 "$ROOT/scripts/stage-tezi.py" "$STAGING/tezi" "$STAGING/rootfs" --output "$STAGING/bundle")
-python3 "$ROOT/scripts/prepare-boot.py" "$STAGING/rootfs" --output "$STAGING/bundle" --manifest-only
+python3 "$ROOT/scripts/inspect-boot.py" "$STAGING/rootfs" --output "$STAGING/bundle"
 python3 "$ROOT/scripts/extract-firmware.py" "$TEZI_DIR/imx-boot" --output "$STAGING/bundle"
 IDENTITY_ARGS=()
 if [[ -n ${RENODE_BOARD_SERIAL:-} ]]; then
@@ -40,7 +40,6 @@ parted -s "$STAGING/emmc.img" mklabel msdos mkpart primary ext4 1MiB 2049MiB
 mkfs.ext4 -q -F -b 4096 -L otaroot -E offset=1048576 \
     -d "$STAGING/rootfs" "$STAGING/emmc.img" 524288
 mv -- "$STAGING/emmc.img" "$OUTPUT"
-# Keep the firmware beside an arbitrary -o disk, without replacing existing
-# bundles or the default artifacts/firmware used by current boot experiments.
+# Keep matching firmware/boot0 beside the disk inside the package.
 mv -- "$STAGING/bundle" "$BUNDLE"
 echo "Prepared $OUTPUT and $BUNDLE with unmodified U-Boot and BL31."
