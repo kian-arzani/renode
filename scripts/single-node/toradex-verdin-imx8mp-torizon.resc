@@ -1,0 +1,41 @@
+:name: Toradex Verdin i.MX8MP Torizon OS
+:description: Boots supplied U-Boot and BL31 unchanged from a post-SPL entry.
+
+include @scripts/helpers/imx8mp-power-state-compatibility.cs
+include @scripts/helpers/linux-boot-handoff.cs
+$name?="torizon_toradex"
+$emmc_image?=@tools/imx8mp-torizon/artifacts/torizon-stock/emmc.img
+$boot0_image?=@tools/imx8mp-torizon/artifacts/torizon-stock/emmc.boot/boot0.img
+$uboot_binary?=@tools/imx8mp-torizon/artifacts/torizon-stock/emmc.boot/u-boot-with-dtb.bin
+$bl31_binary?=@tools/imx8mp-torizon/artifacts/torizon-stock/emmc.boot/bl31.bin
+$reject_power_down?=true
+$wait_on_rejected_power_down?=true
+$reject_ddr_frequency_switch?=true
+$cpu_mips?=250
+using sysbus
+mach create $name
+machine LoadPlatformDescription @platforms/boards/toradex-verdin-imx8mp.repl
+machine SdCardFromFile $emmc_image usdhc3 size=0xC0000000 persistent=False name="emmc" emmc=true bootPartition0Image=$boot0_image
+using sysbus.ca53Cluster
+ca53Cluster ForEach PerformanceInMips $cpu_mips
+macro reset
+"""
+    sysbus LoadBinary $uboot_binary 0x40200000
+    sysbus LoadBinary $bl31_binary 0x970000
+    # No example ELF symbols or symbol-based U-Boot delay/relocation hooks.
+    ca53Cluster ForEach IsHalted true
+    ca53Cluster ForEach RejectUnmodeledPowerDown $reject_power_down $wait_on_rejected_power_down
+    ca53Cluster ForEach RejectUnmodeledDDRFrequencySwitch $reject_ddr_frequency_switch
+    cpu0 IsHalted false
+    cpu0 PC 0x970000
+    # Initialized SPL clock roots and the minimal ROM query service.
+    sysbus WriteDoubleWord 0x30389880 0x01000000
+    sysbus WriteQuadWord 0x990 0x1000 cpu0
+    cpu0 AssembleBlock 0x1000 "movz w2, #2, lsl #16; str w2, [x1]; movz w0, #0xf0; ret" triple="arm64"
+    wdog1 WriteWord 0x8 0
+    wdog2 WriteWord 0x8 0
+    wdog3 WriteWord 0x8 0
+"""
+runMacro $reset
+
+cpu0 InstallLinuxEntropyHandoff

@@ -1,0 +1,5 @@
+mem: Memory.MappedMemory @ sysbus 0x40000000
+    size: 0x200000
+sdhc: SD.NXP_uSDHC @ sysbus 0x30b60000
+    dmaSupported: true
+legacy: SD.NXP_uSDHC @ sysbus 0x30b50000

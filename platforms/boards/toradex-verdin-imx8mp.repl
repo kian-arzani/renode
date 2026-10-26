@@ -1,0 +1,32 @@
+// Post-SPL development profile; DDR training and deep power states are not modeled.
+using "platforms/cpus/nxp-mimx8ml.repl"
+
+// The native board probe sees an 8 GiB profile: map both banks completely.
+memory_ddr_cortexA_cluster:
+    size: 0x140000000
+
+// Existing simple-DMA transfers are covered by read/write and IRQ regressions.
+usdhc3:
+    dmaSupported: true
+
+gpt1:
+    frequency: 24000000
+gpt2:
+    frequency: 24000000
+gpt3:
+    frequency: 24000000
+gpt4:
+    frequency: 24000000
+gpt5:
+    frequency: 24000000
+gpt6:
+    frequency: 24000000
+ecspi2:
+    externalChipSelect: true
+
+sysctr: Timers.IMX8MP_SystemCounter @ sysbus 0x306a0000
+    IRQ -> gic@47
+anatop: Miscellaneous.IMX8MP_AnalogClockControl @ sysbus 0x30360000
+// Storage for CCM roots/gates; peripheral timing is not propagated from it.
+ccm: Memory.MappedMemory @ sysbus 0x30380000
+    size: 0x10000

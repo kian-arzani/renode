@@ -1,0 +1,9 @@
+cpu: CPU.ARMv8A @ sysbus
+    cpuType: "cortex-a53"
+    genericInterruptController: gic
+
+gic: IRQControllers.ARM_GenericInterruptController @ sysbus new Bus.BusMultiRegistration { address: 0x10000000; size: 0x10000; region: "distributor" }
+    architectureVersion: IRQControllers.ARM_GenericInterruptControllerVersion.GICv3
+
+mem: Memory.MappedMemory @ sysbus 0x40000000
+    size: 0x20000

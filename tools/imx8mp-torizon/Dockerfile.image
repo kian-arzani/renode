@@ -1,0 +1,7 @@
+FROM antmicro/renode@sha256:3c44b7a92f576b79c088cea8621c9815aae3f0949cfb04b13370cdb7b5799c35
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash coreutils e2fsprogs findutils parted python3 tar xz-utils zstd \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /work
+ENTRYPOINT ["/work/scripts/create-image.sh"]
